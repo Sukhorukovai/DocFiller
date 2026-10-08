@@ -1,0 +1,29 @@
+# -*- coding: utf-8 -*-
+"""
+Реестр доступных обработчиков документов.
+
+Порядок в DOCUMENT_TYPES важен: более специфичные идут первыми.
+"""
+from pathlib import Path
+
+from .base import DocumentProcessor
+from .contract.processor import ContractProcessor
+
+
+DOCUMENT_TYPES: list[type[DocumentProcessor]] = [
+    # ActProcessor,   # появится в Части 4
+    ContractProcessor,
+]
+
+
+def find_processor(template_path: Path) -> DocumentProcessor:
+    """Возвращает экземпляр подходящего обработчика для шаблона."""
+    for cls in DOCUMENT_TYPES:
+        if cls.matches(Path(template_path)):
+            return cls()
+    raise LookupError(f"Нет обработчика для шаблона: {template_path}")
+
+
+def list_processors() -> list[type[DocumentProcessor]]:
+    """Список всех зарегистрированных обработчиков — для GUI."""
+    return list(DOCUMENT_TYPES)
